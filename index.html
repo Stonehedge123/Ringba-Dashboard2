@@ -506,10 +506,10 @@ function sendRPCAlert(targetName, rpc, threshold) {
             updateStats();
             
             // Flash the page to grab attention
-            document.body.style.animation = 'flash 1.5s';
+            document.body.style.animation = 'flash 3s';
             setTimeout(() => {
                 document.body.style.animation = '';
-            }, 1500);
+            }, 3000);
             
             // Play alert sound based on type
             playAlertSound(alertData.type);
