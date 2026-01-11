@@ -321,6 +321,8 @@
         <div class="test-buttons">
             <button class="test-btn" onclick="testHangupAlert()">🧪 Test Hangup Alert</button>
             <button class="test-btn" onclick="testRPCAlert()">🧪 Test RPC Alert</button>
+            <button class="test-btn" onclick="testHangupSound()">🔊 Test Hangup Sound</button>
+            <button class="test-btn" onclick="testRPCSound()">🔊 Test RPC Sound</button>
             <button class="test-btn clear-btn" onclick="clearAlerts()">🗑️ Clear All Alerts</button>
         </div>
 
@@ -509,11 +511,32 @@ function sendRPCAlert(targetName, rpc, threshold) {
                 document.body.style.animation = '';
             }, 500);
             
-            // Play alert sound if available
+            // Play alert sound based on type
+            playAlertSound(alertData.type);
+        }
+
+        // Play different sounds for different alert types
+        function playAlertSound(alertType) {
             try {
-                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZUQ8PVqzn77BdGAg+ltryxnMoBSh+zPLaizsIGGS57OihUhELTKXh8bllHAU2jdXzzn0vBSJ3yPDejEILFGCy6OyrWBgIPZjZ88p1KwUoc8rx3I4+CRhltOzpoVQTDEuk4PK8aB8GM4/V88t7LwUme8rx34xAChZfsOnnsFYbCUI=');
-                audio.play();
-            } catch(e) {}
+                let audio;
+                
+                if (alertType === 'hangup') {
+                    // Sharp, urgent beep for hangup alerts
+                    audio = new Audio('data:audio/wav;base64,UklGRhQEAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YfADAAD/////AQD+/wAAAQD//wEA//8AAAEAAAABAP//AAD//wEAAAD//wAAAQABAAAA//8AAP//AQD//wAA//8BAP//AAABAAAA//8AAAEAAQAAAAEAAQAAAAEA//8AAP//AQAAAP//AAD//wEA//8AAP7/AgD//wAA//8BAP//AAD//wEAAAAAAAEA//8AAAAA//8BAAAAAAD//wEAAAD//wAAAQD//wAAAAD//wEAAAAAAAEAAAAAAP//AQAAAP//AQD//wAAAAAAAAEA//8AAAAA//8BAAAA//8AAP//AQD//wAA//8BAP//AAD//wEA//8AAAEAAAAAAAAAAAD//wEA//8AAP//AQAAAP//AAD//wEA//8AAP//AQD//wAAAAAAAP//AQAAAP//AAABAAAA//8AAP//AQAAAP7/AQD//wAAAAABAAAA//8AAP//AQAAAP//AAD//wEAAAD//wAAAQD//wAA//8BAAAA//8AAAEAAAD//wAAAQD//wAAAAD//wEA//8AAP//AQAAAP//AAD+/wEA//8AAAAAAAD//wEA//8AAP//AQAAAP//AAD//wEA//8AAAAA//8BAP//AAD//wEAAAD//wAAAQD//wAA//8BAAAA//8AAP//AQD//wAA//8BAAAA//8AAAEAAAD//wAA//8BAAAA//8AAP//AQAAAP//AQD//wAA//8BAAAA//8AAP//AQAAAP//AAD//wEAAAD//wAAAQAAAA==');
+                } else if (alertType === 'rpc') {
+                    // Lower, warning tone for RPC alerts
+                    audio = new Audio('data:audio/wav;base64,UklGRhQEAABXQVZFZm14IBAAAAABAAEAIlYAAESsAAACABAAZGF0YfADAABsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs');
+                }
+                
+                if (audio) {
+                    audio.volume = 0.7; // 70% volume
+                    audio.play().catch(err => {
+                        console.log('Could not play sound:', err);
+                    });
+                }
+            } catch(e) {
+                console.log('Sound playback error:', e);
+            }
         }
 
         // Render alerts
@@ -640,6 +663,15 @@ function sendRPCAlert(targetName, rpc, threshold) {
                 rpc: '2.45',
                 threshold: '5.00'
             });
+        }
+        
+        // Test sounds only (no alert)
+        function testHangupSound() {
+            playAlertSound('hangup');
+        }
+        
+        function testRPCSound() {
+            playAlertSound('rpc');
         }
 
         // Clear alerts
