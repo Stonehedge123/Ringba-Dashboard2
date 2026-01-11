@@ -334,10 +334,22 @@
             </div>
         </div>
 
+        <div class="webhook-url-container">
+            <h3>⚙️ Configuration:</h3>
+            <div class="input-group">
+                <label for="scriptUrl">Google Apps Script Web App URL:</label>
+                <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec" style="width: 100%; padding: 10px; border-radius: 6px; border: none;">
+            </div>
+            <div class="test-buttons" style="margin-top: 15px;">
+                <button class="test-btn" onclick="saveConfig()">💾 Save URL</button>
+                <button class="test-btn" onclick="testConnection()">🔗 Test Connection</button>
+            </div>
+        </div>
+
         <div class="instructions">
             <h3>📝 Setup Instructions:</h3>
-            <p><strong>Step 1:</strong> Open this HTML file on a computer/monitor that you want to display alerts</p>
-            <p style="margin-top: 15px;"><strong>Step 2:</strong> In your Google Apps Script, add this function and call it when you detect issues:</p>
+            <p><strong>Step 1:</strong> Deploy your Google Apps Script as a Web App (see guide below)</p>
+            <p style="margin-top: 15px;"><strong>Step 2:</strong> Paste the Web App URL in the box above and click Save</p>
             <pre><code>// For Hangup Alerts
 function sendHangupAlert(targetName, hangupRate, callCount) {
   UrlFetchApp.fetch('http://localhost:8888/alert', {
@@ -374,17 +386,102 @@ function sendRPCAlert(targetName, rpc, threshold) {
     <script>
         let alerts = [];
         let alertCount = 0;
+        let config = {
+            scriptUrl: localStorage.getItem('scriptUrl') || ''
+        };
 
         // Initialize
         function init() {
             loadAlerts();
             
-            // Listen for storage events (if multiple tabs/windows)
+            // Load saved config
+            if (config.scriptUrl) {
+                document.getElementById('scriptUrl').value = config.scriptUrl;
+                startPolling();
+            }
+            
+            // Listen for storage events
             window.addEventListener('storage', function(e) {
                 if (e.key === 'ringbaAlerts') {
                     loadAlerts();
                 }
             });
+        }
+
+        // Save configuration
+        function saveConfig() {
+            config.scriptUrl = document.getElementById('scriptUrl').value.trim();
+            localStorage.setItem('scriptUrl', config.scriptUrl);
+            
+            if (config.scriptUrl) {
+                alert('✅ Configuration saved! Dashboard will now poll for alerts.');
+                startPolling();
+            } else {
+                alert('⚠️ Please enter a valid Web App URL');
+            }
+        }
+
+        // Test connection
+        async function testConnection() {
+            const url = document.getElementById('scriptUrl').value.trim();
+            if (!url) {
+                alert('Please enter your Web App URL first');
+                return;
+            }
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success !== undefined) {
+                    alert('✅ Connection successful!\n\nAlerts found: ' + (data.alerts ? data.alerts.length : 0));
+                } else {
+                    alert('⚠️ Unexpected response format. Please check your Web App deployment.');
+                }
+            } catch (error) {
+                alert('❌ Connection failed!\n\nError: ' + error.message + '\n\nMake sure:\n1. Web App URL is correct\n2. Web App is deployed\n3. Access is set to "Anyone"');
+            }
+        }
+
+        // Start polling for alerts
+        let pollingInterval;
+        function startPolling() {
+            if (pollingInterval) clearInterval(pollingInterval);
+            
+            // Poll immediately
+            fetchAlerts();
+            
+            // Then poll every 10 seconds
+            pollingInterval = setInterval(fetchAlerts, 10000);
+        }
+
+        // Fetch alerts from Google Script
+        async function fetchAlerts() {
+            if (!config.scriptUrl) return;
+
+            try {
+                const response = await fetch(config.scriptUrl);
+                const data = await response.json();
+                
+                if (data.success && data.alerts && data.alerts.length > 0) {
+                    for (let i = 0; i < data.alerts.length; i++) {
+                        const newAlert = data.alerts[i];
+                        
+                        // Check if this alert already exists
+                        const exists = alerts.some(existing => 
+                            existing.timestamp === newAlert.timestamp && 
+                            existing.target === newAlert.target &&
+                            existing.type === newAlert.type
+                        );
+                        
+                        if (!exists) {
+                            receiveAlert(newAlert);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching alerts:', error);
+            }
         }
 
         // Receive new alert
