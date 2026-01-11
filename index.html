@@ -521,22 +521,73 @@ function sendRPCAlert(targetName, rpc, threshold) {
                 let audio;
                 
                 if (alertType === 'hangup') {
-                    // Sharp, urgent beep for hangup alerts
-                    audio = new Audio('data:audio/wav;base64,UklGRhQEAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YfADAAD/////AQD+/wAAAQD//wEA//8AAAEAAAABAP//AAD//wEAAAD//wAAAQABAAAA//8AAP//AQD//wAA//8BAP//AAABAAAA//8AAAEAAQAAAAEAAQAAAAEA//8AAP//AQAAAP//AAD//wEA//8AAP7/AgD//wAA//8BAP//AAD//wEAAAAAAAEA//8AAAAA//8BAAAAAAD//wEAAAD//wAAAQD//wAAAAD//wEAAAAAAAEAAAAAAP//AQAAAP//AQD//wAAAAAAAAEA//8AAAAA//8BAAAA//8AAP//AQD//wAA//8BAP//AAD//wEA//8AAAEAAAAAAAAAAAD//wEA//8AAP//AQAAAP//AAD//wEA//8AAP//AQD//wAAAAAAAP//AQAAAP//AAABAAAA//8AAP//AQAAAP7/AQD//wAAAAABAAAA//8AAP//AQAAAP//AAD//wEAAAD//wAAAQD//wAA//8BAAAA//8AAAEAAAD//wAAAQD//wAAAAD//wEA//8AAP//AQAAAP//AAD+/wEA//8AAAAAAAD//wEA//8AAP//AQAAAP//AAD//wEA//8AAAAA//8BAP//AAD//wEAAAD//wAAAQD//wAA//8BAAAA//8AAP//AQD//wAA//8BAAAA//8AAAEAAAD//wAA//8BAAAA//8AAP//AQAAAP//AQD//wAA//8BAAAA//8AAP//AQAAAP//AAD//wEAAAD//wAAAQAAAA==');
+                    // HANGUP: Urgent triple beep - high priority emergency sound
+                    // This plays 3 loud beeps to grab attention
+                    playTripleBeep();
                 } else if (alertType === 'rpc') {
-                    // Lower, warning tone for RPC alerts
-                    audio = new Audio('data:audio/wav;base64,UklGRhQEAABXQVZFZm14IBAAAAABAAEAIlYAAESsAAACABAAZGF0YfADAABsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs');
-                }
-                
-                if (audio) {
-                    audio.volume = 0.7; // 70% volume
-                    audio.play().catch(err => {
-                        console.log('Could not play sound:', err);
-                    });
+                    // RPC: Two-tone alert - warning sound
+                    // Lower urgency, notification style
+                    playTwoToneAlert();
                 }
             } catch(e) {
                 console.log('Sound playback error:', e);
             }
+        }
+        
+        // Create urgent triple beep for hangup alerts
+        function playTripleBeep() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const volume = 0.3;
+            
+            // Play 3 beeps
+            [0, 0.3, 0.6].forEach(startTime => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 1200; // High pitch for urgency
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
+                gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + startTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + startTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime + startTime);
+                oscillator.stop(audioContext.currentTime + startTime + 0.2);
+            });
+        }
+        
+        // Create two-tone alert for RPC alerts
+        function playTwoToneAlert() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const volume = 0.2;
+            
+            // High tone
+            const osc1 = audioContext.createOscillator();
+            const gain1 = audioContext.createGain();
+            osc1.connect(gain1);
+            gain1.connect(audioContext.destination);
+            osc1.frequency.value = 800;
+            osc1.type = 'sine';
+            gain1.gain.setValueAtTime(volume, audioContext.currentTime);
+            gain1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+            osc1.start(audioContext.currentTime);
+            osc1.stop(audioContext.currentTime + 0.4);
+            
+            // Low tone (after slight delay)
+            const osc2 = audioContext.createOscillator();
+            const gain2 = audioContext.createGain();
+            osc2.connect(gain2);
+            gain2.connect(audioContext.destination);
+            osc2.frequency.value = 600;
+            osc2.type = 'sine';
+            gain2.gain.setValueAtTime(0, audioContext.currentTime + 0.4);
+            gain2.gain.setValueAtTime(volume, audioContext.currentTime + 0.45);
+            gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.85);
+            osc2.start(audioContext.currentTime + 0.4);
+            osc2.stop(audioContext.currentTime + 0.85);
         }
 
         // Render alerts
