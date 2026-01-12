@@ -615,41 +615,98 @@ function sendRPCAlert(targetName, rpc, threshold) {
         // Create alert card
         function createAlertCard(alert) {
             if (alert.type === 'hangup') {
-                return `
-                    <div class="alert-card hangup">
-                        <div class="alert-header">
-                            <div class="alert-title">
-                                <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                                HIGH HANGUP RATE
-                            </div>
-                            <div class="alert-time">${formatTime(alert.timestamp)}</div>
-                        </div>
-                        <div class="alert-body">
-                            <div class="target-name">${alert.target}</div>
-                            <div class="metrics">
-                                <div class="metric">
-                                    <div class="metric-label">Hangup Rate</div>
-                                    <div class="metric-value danger">${alert.hangupRate}%</div>
+                // Handle both old format (single target) and new format (multiple targets)
+                const isMultiTarget = alert.targets && Array.isArray(alert.targets);
+                
+                if (isMultiTarget) {
+                    // New format: Multiple targets
+                    const targetsList = alert.targets.map(t => 
+                        `<div style="display: flex; justify-content: space-between; padding: 10px; background: white; border-radius: 6px; margin-bottom: 8px;">
+                            <span style="font-weight: 600; color: #1e293b;">${t.name}</span>
+                            <span style="color: #dc2626; font-weight: 700;">${t.hangupRate}% (${t.callCount} calls)</span>
+                        </div>`
+                    ).join('');
+                    
+                    return `
+                        <div class="alert-card hangup">
+                            <div class="alert-header">
+                                <div class="alert-title">
+                                    <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    HIGH HANGUP RATE
                                 </div>
-                                <div class="metric">
-                                    <div class="metric-label">Total Calls</div>
-                                    <div class="metric-value">${alert.callCount}</div>
+                                <div class="alert-time">${formatTime(alert.timestamp)}</div>
+                            </div>
+                            <div class="alert-body">
+                                <div style="background: #fee2e2; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                                    <div style="font-size: 0.9rem; color: #991b1b; font-weight: 600; margin-bottom: 5px;">⚠️ MULTIPLE TARGETS AFFECTED</div>
+                                    <div style="font-size: 2rem; font-weight: 800; color: #dc2626;">${alert.targets.length} Targets</div>
+                                </div>
+                                
+                                <div style="margin: 15px 0; background: #fef2f2; padding: 15px; border-radius: 8px;">
+                                    <div style="font-size: 0.85rem; color: #991b1b; margin-bottom: 10px; font-weight: 600;">📋 AFFECTED TARGETS</div>
+                                    ${targetsList}
+                                </div>
+                                
+                                <div class="metrics">
+                                    <div class="metric">
+                                        <div class="metric-label">Total Short Calls</div>
+                                        <div class="metric-value danger">${alert.totalCalls}</div>
+                                    </div>
+                                </div>
+                                
+                                ${alert.campaigns ? `
+                                <div style="margin: 15px 0; background: white; padding: 15px; border-radius: 8px; border: 2px solid #fecaca;">
+                                    <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">📊 CAMPAIGNS AFFECTED</div>
+                                    <div style="color: #1e293b; font-size: 0.95rem; line-height: 1.6; font-weight: 500;">${alert.campaigns}</div>
+                                </div>
+                                ` : ''}
+                                
+                                <div class="alert-message">
+                                    ⚠️ CRITICAL: Multiple targets experiencing high hangup rates in the last 10 minutes!
                                 </div>
                             </div>
-                            ${alert.campaigns ? `
-                            <div style="margin: 15px 0; background: white; padding: 15px; border-radius: 8px; border: 2px solid #fecaca;">
-                                <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">📊 CAMPAIGNS AFFECTED</div>
-                                <div style="color: #1e293b; font-size: 0.95rem; line-height: 1.6; font-weight: 500;">${alert.campaigns}</div>
+                        </div>
+                    `;
+                } else {
+                    // Old format: Single target (for backwards compatibility)
+                    return `
+                        <div class="alert-card hangup">
+                            <div class="alert-header">
+                                <div class="alert-title">
+                                    <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    HIGH HANGUP RATE
+                                </div>
+                                <div class="alert-time">${formatTime(alert.timestamp)}</div>
                             </div>
-                            ` : ''}
-                            <div class="alert-message">
-                                ⚠️ CRITICAL: ${alert.hangupRate}% of calls are hanging up in the last 10 minutes!
+                            <div class="alert-body">
+                                <div class="target-name">${alert.target}</div>
+                                <div class="metrics">
+                                    <div class="metric">
+                                        <div class="metric-label">Hangup Rate</div>
+                                        <div class="metric-value danger">${alert.hangupRate}%</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-label">Total Calls</div>
+                                        <div class="metric-value">${alert.callCount}</div>
+                                    </div>
+                                </div>
+                                ${alert.campaigns ? `
+                                <div style="margin: 15px 0; background: white; padding: 15px; border-radius: 8px; border: 2px solid #fecaca;">
+                                    <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">📊 CAMPAIGNS AFFECTED</div>
+                                    <div style="color: #1e293b; font-size: 0.95rem; line-height: 1.6; font-weight: 500;">${alert.campaigns}</div>
+                                </div>
+                                ` : ''}
+                                <div class="alert-message">
+                                    ⚠️ CRITICAL: ${alert.hangupRate}% of calls are hanging up in the last 10 minutes!
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             } else {
                 return `
                     <div class="alert-card rpc">
