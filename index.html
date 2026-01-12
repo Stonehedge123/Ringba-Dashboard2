@@ -708,35 +708,88 @@ function sendRPCAlert(targetName, rpc, threshold) {
                     `;
                 }
             } else {
-                return `
-                    <div class="alert-card rpc">
-                        <div class="alert-header">
-                            <div class="alert-title">
-                                <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-                                </svg>
-                                LOW RPC ALERT
+                // RPC Alert
+                const isMultiTarget = alert.targets && Array.isArray(alert.targets);
+                
+                if (isMultiTarget) {
+                    // New format: Multiple targets
+                    const targetsList = alert.targets.map(t => 
+                        `<div style="display: flex; justify-content: space-between; padding: 10px; background: white; border-radius: 6px; margin-bottom: 8px;">
+                            <div>
+                                <div style="font-weight: 600; color: #1e293b;">${t.name}</div>
+                                <div style="font-size: 0.85rem; color: #64748b; margin-top: 2px;">${t.callCount} calls • $${t.revenue} revenue</div>
                             </div>
-                            <div class="alert-time">${formatTime(alert.timestamp)}</div>
-                        </div>
-                        <div class="alert-body">
-                            <div class="target-name">${alert.target}</div>
-                            <div class="metrics">
-                                <div class="metric">
-                                    <div class="metric-label">Current RPC</div>
-                                    <div class="metric-value warning">$${alert.rpc}</div>
+                            <span style="color: #ea580c; font-weight: 700; font-size: 1.1rem;">$${t.rpc}</span>
+                        </div>`
+                    ).join('');
+                    
+                    return `
+                        <div class="alert-card rpc">
+                            <div class="alert-header">
+                                <div class="alert-title">
+                                    <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                                    </svg>
+                                    LOW RPC ALERT
                                 </div>
-                                <div class="metric">
-                                    <div class="metric-label">Threshold</div>
-                                    <div class="metric-value">$${alert.threshold}</div>
+                                <div class="alert-time">${formatTime(alert.timestamp)}</div>
+                            </div>
+                            <div class="alert-body">
+                                <div style="background: #ffedd5; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                                    <div style="font-size: 0.9rem; color: #9a3412; font-weight: 600; margin-bottom: 5px;">⚠️ MULTIPLE TARGETS BELOW THRESHOLD</div>
+                                    <div style="font-size: 2rem; font-weight: 800; color: #ea580c;">${alert.targets.length} Targets</div>
+                                </div>
+                                
+                                <div style="margin: 15px 0; background: #fff7ed; padding: 15px; border-radius: 8px;">
+                                    <div style="font-size: 0.85rem; color: #9a3412; margin-bottom: 10px; font-weight: 600;">📋 AFFECTED TARGETS</div>
+                                    ${targetsList}
+                                </div>
+                                
+                                <div class="metrics">
+                                    <div class="metric">
+                                        <div class="metric-label">Threshold</div>
+                                        <div class="metric-value">$${alert.threshold}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert-message">
+                                    📉 WARNING: Multiple targets have RPC below $${alert.threshold} in the last 30 minutes!
                                 </div>
                             </div>
-                            <div class="alert-message">
-                                📉 WARNING: RPC dropped to $${alert.rpc}, below minimum threshold of $${alert.threshold}
+                        </div>
+                    `;
+                } else {
+                    // Old format: Single target (for backwards compatibility)
+                    return `
+                        <div class="alert-card rpc">
+                            <div class="alert-header">
+                                <div class="alert-title">
+                                    <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                                    </svg>
+                                    LOW RPC ALERT
+                                </div>
+                                <div class="alert-time">${formatTime(alert.timestamp)}</div>
+                            </div>
+                            <div class="alert-body">
+                                <div class="target-name">${alert.target}</div>
+                                <div class="metrics">
+                                    <div class="metric">
+                                        <div class="metric-label">Current RPC</div>
+                                        <div class="metric-value warning">$${alert.rpc}</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-label">Threshold</div>
+                                        <div class="metric-value">$${alert.threshold}</div>
+                                    </div>
+                                </div>
+                                <div class="alert-message">
+                                    📉 WARNING: RPC dropped to $${alert.rpc}, below minimum threshold of $${alert.threshold}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             }
         }
 
