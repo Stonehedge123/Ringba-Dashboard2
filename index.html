@@ -638,8 +638,14 @@ function sendRPCAlert(targetName, rpc, threshold) {
                                     <div class="metric-value">${alert.callCount}</div>
                                 </div>
                             </div>
+                            ${alert.campaigns ? `
+                            <div style="margin: 15px 0; background: white; padding: 15px; border-radius: 8px; border: 2px solid #fecaca;">
+                                <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">📊 CAMPAIGNS AFFECTED</div>
+                                <div style="color: #1e293b; font-size: 0.95rem; line-height: 1.6; font-weight: 500;">${alert.campaigns}</div>
+                            </div>
+                            ` : ''}
                             <div class="alert-message">
-                                ⚠️ CRITICAL: ${alert.hangupRate}% of calls are hanging up in the last 5 minutes!
+                                ⚠️ CRITICAL: ${alert.hangupRate}% of calls are hanging up in the last 10 minutes!
                             </div>
                         </div>
                     </div>
