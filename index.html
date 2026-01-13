@@ -796,13 +796,14 @@ function sendRPCAlert(targetName, rpc, threshold) {
         // Format time
         function formatTime(timestamp) {
             const date = new Date(timestamp);
-            const now = new Date();
-            const diff = Math.floor((now - date) / 1000);
-
-            if (diff < 60) return '🔴 JUST NOW';
-            if (diff < 300) return `🔴 ${Math.floor(diff / 60)} MIN AGO`;
-            if (diff < 3600) return `🟡 ${Math.floor(diff / 60)} MIN AGO`;
-            return date.toLocaleTimeString();
+            
+            // Format as "10:45:23 AM"
+            return date.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true 
+            });
         }
 
         // Update stats
@@ -887,4 +888,4 @@ function sendRPCAlert(targetName, rpc, threshold) {
         document.head.appendChild(style);
     </script>
 </body>
-</html>
+</html> 
