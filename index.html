@@ -619,11 +619,11 @@ function sendRPCAlert(targetName, rpc, threshold) {
                 const isMultiTarget = alert.targets && Array.isArray(alert.targets);
                 
                 if (isMultiTarget) {
-                    // New format: Multiple targets
+                    // New format: Multiple targets - simplified, just show targets
                     const targetsList = alert.targets.map(t => 
-                        `<div style="display: flex; justify-content: space-between; padding: 10px; background: white; border-radius: 6px; margin-bottom: 8px;">
-                            <span style="font-weight: 600; color: #1e293b;">${t.name}</span>
-                            <span style="color: #dc2626; font-weight: 700;">${t.hangupRate}% (${t.callCount} calls)</span>
+                        `<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; border-radius: 6px; margin-bottom: 8px;">
+                            <span style="font-weight: 700; color: #1e293b; font-size: 1.1rem;">${t.name}</span>
+                            <span style="color: #dc2626; font-weight: 700; font-size: 1.3rem;">${t.hangupRate}% (${t.callCount} calls)</span>
                         </div>`
                     ).join('');
                     
@@ -639,13 +639,8 @@ function sendRPCAlert(targetName, rpc, threshold) {
                                 <div class="alert-time">${formatTime(alert.timestamp)}</div>
                             </div>
                             <div class="alert-body">
-                                <div style="background: #fee2e2; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                                    <div style="font-size: 0.9rem; color: #991b1b; font-weight: 600; margin-bottom: 5px;">⚠️ MULTIPLE TARGETS AFFECTED</div>
-                                    <div style="font-size: 2rem; font-weight: 800; color: #dc2626;">${alert.targets.length} Targets</div>
-                                </div>
-                                
-                                <div style="margin: 15px 0; background: #fef2f2; padding: 15px; border-radius: 8px;">
-                                    <div style="font-size: 0.85rem; color: #991b1b; margin-bottom: 10px; font-weight: 600;">📋 AFFECTED TARGETS</div>
+                                <div style="background: #fee2e2; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 3px solid #dc2626;">
+                                    <div style="font-size: 0.9rem; color: #991b1b; font-weight: 700; margin-bottom: 12px; text-transform: uppercase;">⚠️ TARGETS WITH HIGH HANGUPS</div>
                                     ${targetsList}
                                 </div>
                                 
@@ -712,14 +707,14 @@ function sendRPCAlert(targetName, rpc, threshold) {
                 const isMultiTarget = alert.targets && Array.isArray(alert.targets);
                 
                 if (isMultiTarget) {
-                    // New format: Multiple targets
+                    // New format: Multiple targets - simplified, just show targets
                     const targetsList = alert.targets.map(t => 
-                        `<div style="display: flex; justify-content: space-between; padding: 10px; background: white; border-radius: 6px; margin-bottom: 8px;">
+                        `<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; border-radius: 6px; margin-bottom: 8px;">
                             <div>
-                                <div style="font-weight: 600; color: #1e293b;">${t.name}</div>
-                                <div style="font-size: 0.85rem; color: #64748b; margin-top: 2px;">${t.callCount} calls • $${t.revenue} revenue</div>
+                                <div style="font-weight: 700; color: #1e293b; font-size: 1.1rem;">${t.name}</div>
+                                <div style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">${t.callCount} calls • $${t.revenue} revenue</div>
                             </div>
-                            <span style="color: #ea580c; font-weight: 700; font-size: 1.1rem;">$${t.rpc}</span>
+                            <span style="color: #ea580c; font-weight: 700; font-size: 1.3rem;">$${t.rpc}</span>
                         </div>`
                     ).join('');
                     
@@ -735,13 +730,8 @@ function sendRPCAlert(targetName, rpc, threshold) {
                                 <div class="alert-time">${formatTime(alert.timestamp)}</div>
                             </div>
                             <div class="alert-body">
-                                <div style="background: #ffedd5; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                                    <div style="font-size: 0.9rem; color: #9a3412; font-weight: 600; margin-bottom: 5px;">⚠️ MULTIPLE TARGETS BELOW THRESHOLD</div>
-                                    <div style="font-size: 2rem; font-weight: 800; color: #ea580c;">${alert.targets.length} Targets</div>
-                                </div>
-                                
-                                <div style="margin: 15px 0; background: #fff7ed; padding: 15px; border-radius: 8px;">
-                                    <div style="font-size: 0.85rem; color: #9a3412; margin-bottom: 10px; font-weight: 600;">📋 AFFECTED TARGETS</div>
+                                <div style="background: #ffedd5; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 3px solid #ea580c;">
+                                    <div style="font-size: 0.9rem; color: #9a3412; font-weight: 700; margin-bottom: 12px; text-transform: uppercase;">⚠️ TARGETS BELOW THRESHOLD</div>
                                     ${targetsList}
                                 </div>
                                 
